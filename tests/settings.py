@@ -5,6 +5,7 @@ SECRET_KEY = "test-secret-key-not-for-production"
 
 INSTALLED_APPS = [
     "wagtail_multiple_chooser_block",
+    "wagtail_multiple_chooser_block.contrib.bulk_upload",
     "tests.testapp",
     "wagtail.users",
     "wagtail.snippets",

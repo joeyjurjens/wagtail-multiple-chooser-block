@@ -135,12 +135,14 @@
       this.update();
     }
 
-    /** Add the selected items that aren't shown to the submitted form. */
+    /** Add the selected items that aren't in the submitted form to it. */
     submit(form) {
       if (!form.matches(FORM)) return;
-      const shownIds = new Set(this.checkboxes.map(({ value }) => value));
+      const submittedIds = new Set(
+        [...form.querySelectorAll(CHECKBOX)].map(({ value }) => value),
+      );
       [...this.selected.keys()]
-        .filter((id) => !shownIds.has(id))
+        .filter((id) => !submittedIds.has(id))
         .forEach((id) => {
           const input = document.createElement('input');
           input.type = 'hidden';

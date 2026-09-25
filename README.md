@@ -67,6 +67,36 @@ Besides the options of `ListBlock`, such as `min_num` and `max_num`:
 
 With `max_num`, the chooser only lets you select as many items as the list has room for, and the "+" buttons are disabled once the list is full.
 
+## Bulk upload
+
+The optional `bulk_upload` app puts Wagtail's bulk upload for images and documents in the upload tab of the chooser, the same one as in Wagtail's "Add images" and "Add documents" views. When all uploads succeed, the uploaded items are added to the list straight away, along with the items selected in the chooser. Otherwise, the chooser stays open with the status of each upload, and "Confirm selection" adds the uploaded items. A duplicate image then has the choice of Wagtail's image chooser, between the new and the existing image, and an upload that needs more details, such as for a required field of a custom image model, has its form.
+
+Add it to `INSTALLED_APPS`:
+
+```python
+INSTALLED_APPS = [
+    # ...
+    "wagtail_multiple_chooser_block",
+    "wagtail_multiple_chooser_block.contrib.bulk_upload",
+]
+```
+
+Then use its chooser blocks in a `MultipleChooserBlock`:
+
+```python
+from wagtail_multiple_chooser_block.contrib.bulk_upload.blocks import (
+    BulkUploadDocumentChooserBlock,
+    BulkUploadImageBlock,
+    BulkUploadImageChooserBlock,
+)
+
+images = MultipleChooserBlock(BulkUploadImageChooserBlock())
+images = MultipleChooserBlock(BulkUploadImageBlock(), chooser_field_name="image")
+documents = MultipleChooserBlock(BulkUploadDocumentChooserBlock())
+```
+
+They are Wagtail's `ImageChooserBlock`, `ImageBlock` and `DocumentChooserBlock`, with a chooser that has the bulk upload, and store the same values. Outside a `MultipleChooserBlock`, their chooser is the same as Wagtail's.
+
 ## Development
 
 ```bash

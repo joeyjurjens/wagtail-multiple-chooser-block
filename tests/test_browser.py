@@ -35,7 +35,9 @@ def image_file(color):
     return SimpleUploadedFile(f"{color}.png", buffer.getvalue(), "image/png")
 
 
-class TestMultipleChooserBlockEditing(WagtailTestUtils, StaticLiveServerTestCase):
+class EditingTestCase(WagtailTestUtils, StaticLiveServerTestCase):
+    """Edits a GalleryPage in the Wagtail admin with a browser."""
+
     @classmethod
     def setUpClass(cls):
         media_root = tempfile.mkdtemp()
@@ -81,8 +83,9 @@ class TestMultipleChooserBlockEditing(WagtailTestUtils, StaticLiveServerTestCase
             ]
         )
         self.page = browser_context.new_page()
-        # Fail fast, rather than waiting the default 30 seconds per action
-        self.page.set_default_timeout(5000)
+        # Fail faster than the default 30 seconds per action, while leaving
+        # room for animations when running several test environments at once
+        self.page.set_default_timeout(10000)
         self.js_errors = []
         self.page.on("pageerror", lambda error: self.js_errors.append(error))
         self.page.goto(f"{self.live_server_url}/admin/pages/{self.gallery_page.pk}/edit/")
@@ -134,6 +137,8 @@ class TestMultipleChooserBlockEditing(WagtailTestUtils, StaticLiveServerTestCase
         self.assertEqual(len(body), 1)
         return body[0].value
 
+
+class TestMultipleChooserBlockEditing(EditingTestCase):
     def test_starts_empty(self):
         self.add_block("Images")
         # No empty chooser, only the "+" button to open the chooser with
@@ -334,3 +339,131 @@ class TestMultipleChooserBlockEditing(WagtailTestUtils, StaticLiveServerTestCase
         self.confirm()
         self.save_draft()
         self.assertEqual(list(self.get_saved_value()), [self.green])
+
+
+class TestBulkUpload(EditingTestCase):
+    """The bulk upload contrib app: Wagtail's bulk upload in the chooser."""
+
+    def setUp(self):
+        super().setUp()
+        self.upload_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.upload_dir)
+
+    def upload_file(self, name, content=None):
+        path = os.path.join(self.upload_dir, name)
+        if content is None:
+            # A colour of its own, or Wagtail sees a duplicate
+            color = tuple(ord(character) * 7 % 256 for character in name[:3])
+            PILImage.new("RGB", (40, 40), color=color).save(path)
+        else:
+            with open(path, "w") as file:
+                file.write(content)
+        return path
+
+    def upload(self, *paths):
+        """Upload files with the bulk upload in the chooser's upload tab."""
+        self.page.locator(".modal").get_by_role("tab", name="Upload").click()
+        self.page.locator(".modal #fileupload").set_input_files(list(paths))
+
+    def rows(self, status=""):
+        return self.page.locator(f"#upload-list > li{status}")
+
+    def messages(self):
+        """The messages of the uploads that add an item."""
+        return self.rows(".upload-success").locator(".status-msg.success")
+
+    def confirm_uploads(self):
+        self.page.locator("[data-multiple-chooser-block-bulk-upload] [type=submit]").click()
+        self.page.locator(".modal").wait_for(state="hidden")
+
+    def check_decorative(self):
+        # ImageBlock requires alt text, unless the image is decorative
+        for checkbox in self.page.locator("input[name$='-decorative']").all():
+            checkbox.check()
+
+    def test_upload_images(self):
+        self.add_block("Bulk images")
+        self.list_add_buttons().first.click()
+        self.checkbox(self.red).check()
+
+        # Once uploaded, the images are added along with the selected image
+        self.upload(self.upload_file("sourdough.png"), self.upload_file("rye.png"))
+        self.page.locator(".modal").wait_for(state="hidden")
+
+        self.check_decorative()
+        self.save_draft()
+        titles = [image.title for image in self.get_saved_value()]
+        self.assertEqual(len(titles), 3)
+        self.assertIn("Red", titles)
+        self.assertEqual(Image.objects.count(), 6)
+
+    def test_invalid_file(self):
+        self.add_block("Bulk images")
+        self.list_add_buttons().first.click()
+        self.upload(
+            self.upload_file("sourdough.png"),
+            self.upload_file("notes.txt", "Not an image"),
+        )
+        # The chooser stays open with the status of each upload
+        expect(self.messages()).to_have_text(["Image 'sourdough' added."])
+        expect(self.rows(".upload-failure")).to_have_count(1)
+        self.confirm_uploads()
+
+        self.check_decorative()
+        self.save_draft()
+        self.assertEqual(len(self.get_saved_value()), 1)
+
+    @override_settings(WAGTAILIMAGES_IMAGE_FORM_BASE="tests.testapp.forms.SourceImageForm")
+    def test_fill_in_upload_form(self):
+        self.add_block("Bulk images")
+        self.list_add_buttons().first.click()
+        self.upload(self.upload_file("sourdough.png"))
+        # The image is saved once its form is filled in, and its row stays
+        self.page.get_by_label("Source").fill("Bakery")
+        self.page.get_by_role("button", name="Update").click()
+        expect(self.messages()).to_have_text(["Image 'sourdough.png' added."])
+        expect(self.page.get_by_label("Source")).to_have_count(0)
+        self.confirm_uploads()
+
+        self.check_decorative()
+        self.save_draft()
+        titles = [image.title for image in self.get_saved_value()]
+        self.assertEqual(titles, ["sourdough.png"])
+
+    def test_duplicates(self):
+        self.add_block("Bulk images")
+        self.list_add_buttons().first.click()
+        red = self.upload_file("red.png")
+        with open(red, "wb") as file:
+            file.write(image_file("red").read())
+        self.red.get_file_hash()
+        # The same colour as sourdough.png, and the same file as the Red image
+        self.upload(self.upload_file("sourdough.png"), self.upload_file("sour.png"), red)
+        # The choice of Wagtail's image chooser, after which the row shows the image used
+        self.rows().nth(1).get_by_role("button", name="Use new image").click()
+        self.rows().nth(2).get_by_role("button", name="Use existing and delete new").click()
+        expect(self.messages()).to_have_text(
+            ["Image 'sourdough' added.", "Image 'sour' added.", "Image 'Red' added."]
+        )
+        expect(self.rows().nth(2).locator(".left")).to_contain_text("Red")
+        self.confirm_uploads()
+
+        self.check_decorative()
+        self.save_draft()
+        titles = [image.title for image in self.get_saved_value()]
+        self.assertCountEqual(titles, ["sourdough", "sour", "Red"])
+        # As in Wagtail's chooser, the new image is deleted when using the existing one
+        self.assertEqual(Image.objects.count(), 6)
+
+    def test_upload_documents(self):
+        self.add_block("Bulk documents")
+        self.list_add_buttons().first.click()
+        self.upload(
+            self.upload_file("menu.txt", "Menu"),
+            self.upload_file("prices.txt", "Prices"),
+        )
+        self.page.locator(".modal").wait_for(state="hidden")
+
+        self.save_draft()
+        self.assertEqual(len(self.get_saved_value()), 2)
+        self.assertEqual(Document.objects.count(), 2)

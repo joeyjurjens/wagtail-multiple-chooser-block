@@ -1,0 +1,26 @@
+{% load i18n wagtailadmin_tags %}
+{% comment %}
+    The upload tab of the chooser, as wagtailadmin/generic/chooser/creation_form.html,
+    with Wagtail's bulk upload from its "Add images" and "Add documents" views.
+{% endcomment %}
+<section
+    id="tab-{{ view.creation_tab_id }}"
+    class="w-tabs__panel"
+    role="tabpanel"
+    hidden
+    aria-labelledby="tab-label-{{ view.creation_tab_id }}"
+    data-w-tabs-target="panel"
+    data-action="w-focus:focus->w-tabs#selectInside"
+>
+    {{ bulk_upload.form_media.css }}
+    {% block bulk_upload %}{% endblock %}
+
+    {# Submitted by the chooser like its own form for choosing multiple items #}
+    <form data-multiple-choice-form data-multiple-chooser-block-bulk-upload action="{{ chosen_multiple_url }}" method="GET" hidden>
+        <input type="submit" value="{% trans 'Confirm selection' %}" class="button">
+    </form>
+
+    {{ bulk_upload.form_media.js }}
+    {% block scripts %}{% endblock %}
+    <script src="{% versioned_static 'wagtail_multiple_chooser_block/bulk_upload/js/bulk-upload.js' %}"></script>
+</section>

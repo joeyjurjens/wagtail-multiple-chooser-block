@@ -9,6 +9,10 @@ from wagtail.models import Page
 from wagtail.snippets.blocks import SnippetChooserBlock
 from wagtail.snippets.models import register_snippet
 from wagtail_multiple_chooser_block.blocks import MultipleChooserBlock
+from wagtail_multiple_chooser_block.contrib.bulk_upload.blocks import (
+    BulkUploadDocumentChooserBlock,
+    BulkUploadImageBlock,
+)
 
 
 class CaptionedImageBlock(StructBlock):
@@ -44,6 +48,11 @@ class GalleryPage(Page):
                 MultipleChooserBlock(ImageChooserBlock(), allow_duplicates=False),
             ),
             ("three_images", MultipleChooserBlock(ImageChooserBlock(), max_num=3)),
+            (
+                "bulk_images",
+                MultipleChooserBlock(BulkUploadImageBlock(), chooser_field_name="image"),
+            ),
+            ("bulk_documents", MultipleChooserBlock(BulkUploadDocumentChooserBlock())),
         ],
         blank=True,
     )

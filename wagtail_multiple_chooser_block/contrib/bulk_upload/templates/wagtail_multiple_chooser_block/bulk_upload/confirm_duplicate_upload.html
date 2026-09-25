@@ -1,0 +1,32 @@
+{% load wagtailadmin_tags wagtailimages_tags i18n %}
+{% comment %}
+    wagtailimages/images/confirm_duplicate_upload.html, with the choice of
+    wagtailimages/chooser/confirm_duplicate_upload.html
+{% endcomment %}
+
+<div class="confirm-duplicate-upload" data-multiple-chooser-block-duplicate>
+    <figure>
+        {% image existing_image max-150x150 %}
+        <figcaption>{{ existing_image.title }}</figcaption>
+    </figure>
+    <form method="POST">
+        {% csrf_token %}
+        <button
+            type="button"
+            class="button button-secondary"
+            data-multiple-chooser-block-use-new
+            data-message="{{ new_message }}"
+        >
+            {% trans "Use new image" %}
+        </button>
+        <button
+            type="button"
+            class="button"
+            data-multiple-chooser-block-use-existing="{{ existing_image.pk }}"
+            data-delete-url="{{ delete_action }}"
+            data-message="{{ existing_message }}"
+        >
+            {% trans "Use existing and delete new" %}
+        </button>
+    </form>
+</div>
