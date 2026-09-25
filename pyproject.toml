@@ -1,0 +1,66 @@
+[project]
+name = "wagtail-multiple-chooser-block"
+version = "0.1.0"
+description = "A StreamField block to choose multiple images, documents, pages or snippets at once, like MultipleChooserPanel"
+readme = "README.md"
+authors = [
+    { name = "Joey Jurjens", email = "joeyjurjens@gmail.com" }
+]
+requires-python = ">=3.10"
+license = "MIT"
+classifiers = [
+    "Framework :: Django",
+    "Framework :: Wagtail",
+    "Framework :: Wagtail :: 7",
+    "Framework :: Wagtail :: 8",
+]
+dependencies = [
+    "wagtail>=7.0",
+]
+
+[project.urls]
+Repository = "https://github.com/joeyjurjens/wagtail-multiple-chooser-block"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["wagtail_multiple_chooser_block"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+pythonpath = ["."]
+
+[dependency-groups]
+dev = [
+    "playwright>=1.55.0",
+    "pytest>=8.4.2",
+    "pytest-django>=4.11.1",
+    "ruff>=0.8.0",
+    "tox>=4.30.0",
+    "tox-uv>=1.28.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["wagtail_multiple_chooser_block"]
+section-order = [
+  "future",
+  "standard-library",
+  "django",
+  "wagtail",
+  "third-party",
+  "first-party",
+  "local-folder",
+]
+
+[tool.ruff.lint.isort.sections]
+django = ["django", "django_*"]
+wagtail = ["wagtail", "wagtail_*"]

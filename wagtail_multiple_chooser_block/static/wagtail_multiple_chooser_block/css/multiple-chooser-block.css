@@ -1,0 +1,50 @@
+/* The selected items in the chooser, above its confirm button. */
+.multiple-chooser-block-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.multiple-chooser-block-selection:empty {
+  display: none;
+}
+
+.multiple-chooser-block-selection__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.25rem 0.25rem 0.75rem;
+  border: 1px solid var(--w-color-border-field-default);
+  border-radius: 999px;
+  background: var(--w-color-surface-field);
+  color: var(--w-color-text-context);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.multiple-chooser-block-selection__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--w-color-icon-secondary);
+  cursor: pointer;
+}
+
+.multiple-chooser-block-selection__remove:hover {
+  background: var(--w-color-surface-button-outline-hover);
+  color: var(--w-color-icon-secondary-hover);
+}
+
+.multiple-chooser-block-selection__remove .icon {
+  width: 1rem;
+  height: 1rem;
+}

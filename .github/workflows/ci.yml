@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uv sync
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env:
+          - py310-django52-wagtail70
+          - py313-django52-wagtail70
+          - py312-django52-wagtail74
+          - py312-django60-wagtail74
+          - py314-django52-wagtail74
+          - py314-django60-wagtail74
+          - py310-django52-wagtail80
+          - py314-django52-wagtail80
+          - py312-django60-wagtail80
+          - py312-django61-wagtail80
+          - py314-django60-wagtail80
+          - py314-django61-wagtail80
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uvx playwright install-deps chromium
+      - run: uvx --with tox-uv tox run -e ${{ matrix.env }}
