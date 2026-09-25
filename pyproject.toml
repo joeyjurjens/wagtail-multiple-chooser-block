@@ -1,6 +1,6 @@
 [project]
 name = "wagtail-multiple-chooser-block"
-version = "0.1.0"
+version = "0.2.0"
 description = "A StreamField block to choose multiple images, documents, pages or snippets at once, like MultipleChooserPanel"
 readme = "README.md"
 authors = [
