@@ -51,10 +51,11 @@ class MultipleChooserBlock(ListBlock):
             for part in path_parts:
                 try:
                     block = block.child_blocks[part]
-                except KeyError:
+                except (AttributeError, KeyError):
                     raise ImproperlyConfigured(
-                        f"MultipleChooserBlock's chooser_field_name {part!r} is not a "
-                        f"child block of {type(block).__name__}"
+                        f"MultipleChooserBlock's chooser_field_name {name!r} is not a "
+                        f"path to a child block: {part!r} is not a child block of "
+                        f"{type(block).__name__}"
                     ) from None
         elif name is not None:
             raise ImproperlyConfigured(

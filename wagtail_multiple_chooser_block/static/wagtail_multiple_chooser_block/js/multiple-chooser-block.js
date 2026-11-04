@@ -158,8 +158,11 @@
     getChooserWidget(child) {
       const { chooserFieldName } = this.blockDef.meta;
       const pathParts = chooserFieldName ? chooserFieldName.split('.') : [];
-      const block = pathParts.reduce((block, part) => block.childBlocks[part], child.block);
-      return block.widget;
+      const chooserBlock = pathParts.reduce(
+        (parentBlock, part) => parentBlock.childBlocks[part],
+        child.block,
+      );
+      return chooserBlock.widget;
     }
 
     getChosenIds() {
@@ -253,10 +256,11 @@
       const { chooserFieldName } = this.meta;
       const pathParts = chooserFieldName ? chooserFieldName.split('.') : [];
       const chooserBlockDef = pathParts.reduce(
-        (childBlockDef, part) => childBlockDef.childBlockDefs.find(
-          innerChildBlockDef => innerChildBlockDef.name === part
-        ),
-        this.childBlockDef
+        (parentBlockDef, part) =>
+          parentBlockDef.childBlockDefs.find(
+            (childBlockDef) => childBlockDef.name === part,
+          ),
+        this.childBlockDef,
       );
       return chooserBlockDef.widget;
     }
