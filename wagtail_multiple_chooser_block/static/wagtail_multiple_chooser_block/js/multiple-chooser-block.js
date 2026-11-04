@@ -157,9 +157,8 @@
     /** The bound chooser widget of a list item. */
     getChooserWidget(child) {
       const { chooserFieldName } = this.blockDef.meta;
-      const block = chooserFieldName
-        ? child.block.childBlocks[chooserFieldName]
-        : child.block;
+      const path_parts = chooserFieldName ? chooserFieldName.split('.') : [];
+      const block = path_parts.reduce((block, part) => block.childBlocks[part], child.block)
       return block.widget;
     }
 
@@ -252,11 +251,13 @@
     /** The chooser widget definition, used to open the chooser. */
     get chooserWidgetFactory() {
       const { chooserFieldName } = this.meta;
-      const chooserBlockDef = chooserFieldName
-        ? this.childBlockDef.childBlockDefs.find(
-            (childBlockDef) => childBlockDef.name === chooserFieldName,
-          )
-        : this.childBlockDef;
+      const pathParts = chooserFieldName ? chooserFieldName.split('.') : [];
+      const chooserBlockDef = pathParts.reduce(
+        (childBlockDef, part) => childBlockDef.childBlockDefs.find(
+          innerChildBlockDef => innerChildBlockDef.name === part
+        ),
+        this.childBlockDef
+      );
       return chooserBlockDef.widget;
     }
 

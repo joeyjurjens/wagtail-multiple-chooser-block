@@ -53,10 +53,20 @@ class CaptionedImageBlock(StructBlock):
 
 
 images = MultipleChooserBlock(CaptionedImageBlock(), chooser_field_name="image")
-images = MultipleChooserBlock(ImageBlock(), chooser_field_name="image")
 ```
 
 The value is stored the same way as a `ListBlock`, so changing a `ListBlock` into a `MultipleChooserBlock` needs a migration, but no data migration.
+
+For items where a chooser is part of a nested elements, name `chooser_field_name` with a path to the chooser, such as `"parent.chooser"`:
+
+```python
+class SlideBlock(StructBlock):
+    captioned_image = CaptionedImageBlock()
+    text = TextBlock()
+
+
+images = MultipleChooserBlock(SlideBlock(), chooser_field_name="captioned_image.image")
+```
 
 ### Options
 

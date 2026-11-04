@@ -1,7 +1,7 @@
 from django.db import models
 
 from wagtail.admin.panels import FieldPanel
-from wagtail.blocks import CharBlock, PageChooserBlock, StructBlock
+from wagtail.blocks import CharBlock, PageChooserBlock, StructBlock, TextBlock
 from wagtail.documents.blocks import DocumentChooserBlock
 from wagtail.fields import StreamField
 from wagtail.images.blocks import ImageBlock, ImageChooserBlock
@@ -20,6 +20,11 @@ class CaptionedImageBlock(StructBlock):
     caption = CharBlock(required=False)
 
 
+class SlideBlock(StructBlock):
+    captioned_image = CaptionedImageBlock()
+    text = TextBlock()
+
+
 @register_snippet
 class Author(models.Model):
     name = models.CharField(max_length=255)
@@ -35,6 +40,10 @@ class GalleryPage(Page):
             (
                 "captioned_images",
                 MultipleChooserBlock(CaptionedImageBlock(), chooser_field_name="image"),
+            ),
+            (
+                "slide_blocks",
+                MultipleChooserBlock(SlideBlock(), chooser_field_name="captioned_image.image"),
             ),
             (
                 "image_blocks",

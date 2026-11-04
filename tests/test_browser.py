@@ -186,6 +186,17 @@ class TestMultipleChooserBlockEditing(EditingTestCase):
         self.assertCountEqual([item["image"] for item in value], [self.red, self.green])
         self.assertCountEqual([item["caption"] for item in value], ["A caption", ""])
 
+    def test_nested_struct_block(self):
+        self.add_block("Slide blocks")
+        self.choose(self.red, self.green)
+        self.page.locator("input[name$='-caption']").first.fill("A caption")
+        self.page.locator("textarea[name$='-text']").first.fill("A text")
+        self.save_draft()
+        value = self.get_saved_value()
+        self.assertCountEqual([item["captioned_image"]["image"] for item in value], [self.red, self.green])
+        self.assertCountEqual([item["captioned_image"]["caption"] for item in value], ["A caption", ""])
+        self.assertCountEqual([item["text"] for item in value], ["A text", ""])
+
     def test_image_block(self):
         self.add_block("Image blocks")
         self.choose(self.red, self.green)
