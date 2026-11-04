@@ -34,7 +34,7 @@ jobs:
           - py312-django61-wagtail80
           - py314-django60-wagtail80
           - py314-django61-wagtail80
-          - py310-django52-wagtail81
+          - py311-django52-wagtail81
           - py314-django52-wagtail81
           - py312-django60-wagtail81
           - py312-django61-wagtail81
