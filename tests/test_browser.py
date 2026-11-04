@@ -193,8 +193,12 @@ class TestMultipleChooserBlockEditing(EditingTestCase):
         self.page.locator("textarea[name$='-text']").first.fill("A text")
         self.save_draft()
         value = self.get_saved_value()
-        self.assertCountEqual([item["captioned_image"]["image"] for item in value], [self.red, self.green])
-        self.assertCountEqual([item["captioned_image"]["caption"] for item in value], ["A caption", ""])
+        self.assertCountEqual(
+            [item["captioned_image"]["image"] for item in value], [self.red, self.green]
+        )
+        self.assertCountEqual(
+            [item["captioned_image"]["caption"] for item in value], ["A caption", ""]
+        )
         self.assertCountEqual([item["text"] for item in value], ["A text", ""])
 
     def test_image_block(self):

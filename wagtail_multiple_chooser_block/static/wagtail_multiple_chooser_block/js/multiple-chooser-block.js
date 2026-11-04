@@ -157,8 +157,8 @@
     /** The bound chooser widget of a list item. */
     getChooserWidget(child) {
       const { chooserFieldName } = this.blockDef.meta;
-      const path_parts = chooserFieldName ? chooserFieldName.split('.') : [];
-      const block = path_parts.reduce((block, part) => block.childBlocks[part], child.block)
+      const pathParts = chooserFieldName ? chooserFieldName.split('.') : [];
+      const block = pathParts.reduce((block, part) => block.childBlocks[part], child.block);
       return block.widget;
     }
 

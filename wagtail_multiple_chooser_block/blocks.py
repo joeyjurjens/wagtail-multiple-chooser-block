@@ -45,7 +45,7 @@ class MultipleChooserBlock(ListBlock):
                     "chooser_field_name argument"
                 )
 
-            path_parts = name.split('.')
+            path_parts = name.split(".")
             block = self.child_block
 
             for part in path_parts:
