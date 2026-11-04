@@ -44,13 +44,19 @@ class MultipleChooserBlock(ListBlock):
                     "MultipleChooserBlock with a StructBlock child must specify a "
                     "chooser_field_name argument"
                 )
-            try:
-                block = self.child_block.child_blocks[name]
-            except KeyError:
-                raise ImproperlyConfigured(
-                    f"MultipleChooserBlock's chooser_field_name {name!r} is not a "
-                    f"child block of {type(self.child_block).__name__}"
-                ) from None
+
+            path_parts = name.split(".")
+            block = self.child_block
+
+            for part in path_parts:
+                try:
+                    block = block.child_blocks[part]
+                except (AttributeError, KeyError):
+                    raise ImproperlyConfigured(
+                        f"MultipleChooserBlock's chooser_field_name {name!r} is not a "
+                        f"path to a child block: {part!r} is not a child block of "
+                        f"{type(block).__name__}"
+                    ) from None
         elif name is not None:
             raise ImproperlyConfigured(
                 "MultipleChooserBlock's chooser_field_name only applies to a StructBlock child"

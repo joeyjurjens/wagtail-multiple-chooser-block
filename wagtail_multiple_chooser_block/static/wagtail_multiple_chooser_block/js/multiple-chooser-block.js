@@ -157,10 +157,12 @@
     /** The bound chooser widget of a list item. */
     getChooserWidget(child) {
       const { chooserFieldName } = this.blockDef.meta;
-      const block = chooserFieldName
-        ? child.block.childBlocks[chooserFieldName]
-        : child.block;
-      return block.widget;
+      const pathParts = chooserFieldName ? chooserFieldName.split('.') : [];
+      const chooserBlock = pathParts.reduce(
+        (parentBlock, part) => parentBlock.childBlocks[part],
+        child.block,
+      );
+      return chooserBlock.widget;
     }
 
     getChosenIds() {
@@ -252,11 +254,14 @@
     /** The chooser widget definition, used to open the chooser. */
     get chooserWidgetFactory() {
       const { chooserFieldName } = this.meta;
-      const chooserBlockDef = chooserFieldName
-        ? this.childBlockDef.childBlockDefs.find(
-            (childBlockDef) => childBlockDef.name === chooserFieldName,
-          )
-        : this.childBlockDef;
+      const pathParts = chooserFieldName ? chooserFieldName.split('.') : [];
+      const chooserBlockDef = pathParts.reduce(
+        (parentBlockDef, part) =>
+          parentBlockDef.childBlockDefs.find(
+            (childBlockDef) => childBlockDef.name === part,
+          ),
+        this.childBlockDef,
+      );
       return chooserBlockDef.widget;
     }
 
